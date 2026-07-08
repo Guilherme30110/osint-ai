@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Relatório de Investigação OSINT">
+  <title>Relatório OSINT — {{ target }}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap');
+
+:root {
+  --bg-main: #30302e;
+  --text-muted: #6b7280;
+  --text-light: #faf9f5;
+  --text-sub: #c2c0b6;
+  --color-blue: #4a9eff;
+  --color-border: #3a3a36;
+  --bg-card: #262624;
+  --color-green: #2ea84f;
+  --color-amber: #d4830a;
+  --color-red: #e24b4a;
+  --bg-blue-dark: #0a1e35;
+  --bg-green-dark: #0e2e17;
+  --bg-gray-dark: #2a2a28;
+  --bg-footer: #1e1e1c;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+@page {
+    margin: 0;
+    padding: 0;
+}
+.section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+html,body{background:var(--bg-main);margin:0;padding:0}
+.rpt{width:100%;font-family:Arial,sans-serif;background:var(--bg-main);overflow:hidden;border:0.5px solid #4a4a46}
+.nav{padding:16px 24px;background:#0d1b2a;border-bottom:0.5px solid #2a3a4a}
+.nav-sub{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.nav-name{font-family:'Raleway',sans-serif;font-size:22px;font-weight:700;color:var(--text-light);margin-bottom:8px}
+.nav-meta{display:flex;gap:16px;align-items:center;flex-wrap:wrap; justify-content:space-between;width:100%}
+.nav-cpf{font-size:12px;font-family:'Courier New',monospace;color:var(--text-sub)}
+.body{padding:0}
+.section{border-bottom:0.5px solid var(--color-border);padding:18px 24px}
+.section:last-child{border-bottom:none}
+.sec-title{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-sub);margin-bottom:14px}
+.sec-title i{font-size:15px;color:var(--color-blue)}
+.counters{display:grid;gap:8px;margin-bottom:14px}
+.cbox{background:var(--bg-card);border:0.5px solid var(--color-border);border-radius:6px;padding:12px;text-align:center}
+.cnum{font-size:20px;font-weight:500;font-family:'Courier New',monospace;color:var(--text-light)}
+.cnum.blue{color:var(--color-blue)}
+.cnum.green{color:var(--color-green)}
+.cnum.amber{color:var(--color-amber)}
+.cnum.red{color:var(--color-red)}
+.clabel{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-top:3px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg-blue-dark);color:var(--color-blue);font-family:'Courier New',monospace;border:0.5px solid #1b3a5c}
+.whois-block{background:var(--bg-card);border-radius:6px;padding:12px 16px;font-family:'Courier New',monospace;font-size:12px;border:0.5px solid var(--color-border)}
+.wline{display:flex;gap:12px;padding:4px 0;border-bottom:0.5px solid var(--color-border)}
+.wline:last-child{border-bottom:none}
+.wkey{color:var(--text-muted);min-width:160px;flex-shrink:0}
+.wval{color:var(--text-light)}
+.wval.hi{color:var(--color-blue)}
+.wval.rd{color:var(--text-muted);font-style:italic}
+.dork-list{display:flex;flex-direction:column;gap:6px}
+.ditem{background:var(--bg-card);border-radius:6px;padding:10px 14px;border-left:3px solid var(--color-border);border-top:0.5px solid var(--color-border);border-right:0.5px solid var(--color-border);border-bottom:0.5px solid var(--color-border);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.ditem.hit{border-left-color:var(--color-green)}
+.ditem.miss{border-left-color:var(--color-border)}
+.dquery{font-size:12px;font-family:'Courier New',monospace;color:var(--text-light);flex:1;word-break:break-all}
+.dresults{font-size:11px;color:var(--text-sub)}
+.dstatus{font-size:10px;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.dstatus.hit{background:var(--bg-green-dark);color:var(--color-green)}
+.dstatus.miss{background:var(--bg-gray-dark);color:var(--text-muted)}
+.leak-list{display:flex;flex-direction:column;gap:8px}
+.litem{background:var(--bg-card);border:0.5px solid var(--color-border);border-radius:6px;padding:12px 16px}
+.lemail{font-size:13px;font-family:'Courier New',monospace;color:var(--color-blue);margin-bottom:6px}
+.lmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lcount{font-size:11px;color:var(--color-red);font-weight:500}
+.lcount.safe{color:var(--color-green)}
+.lservice{font-size:10px;padding:3px 8px;border-radius:4px;background:var(--bg-blue-dark);color:var(--color-blue);font-family:'Courier New',monospace;}
+.priv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.pcard{background:var(--bg-card);border-radius:6px;padding:10px 14px;border:0.5px solid var(--color-border)}
+.plabel{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.pval{font-size:13px;color:var(--text-light);font-family:'Courier New',monospace}
+.pval.empty{color:var(--text-muted);font-style:italic}
+.suggest{font-size:13px;color:var(--text-sub);line-height:1.7}
+</style>
+</head>
+<body>
+<div class="rpt">
+  <div class="nav">
+    <div class="nav-sub"><i class="ti ti-hexagon" aria-hidden="true"></i> Relatório de OSINT</div>
+    <div class="nav-name">{{ target }}</div>
+  </div>
+
+  <div class="body">
+
+    <div class="section">
+      <div class="sec-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Resumo da varredura</div>
+      <div class="counters" style="grid-template-columns:repeat(2,1fr)">
+        <div class="cbox"><div class="cnum blue">{{ dorks_testadas }}</div><div class="clabel">Dorks testadas</div></div>
+        <div class="cbox"><div class="cnum green">{{ dorks_com_resultados }}</div><div class="clabel">Com resultado</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-title">
+        <i class="ti ti-gavel" aria-hidden="true"></i> Processos judiciais
+      </div>
+      {% if processos and processos.detalhes_processos %}
+      <div class="whois-block" style="padding:0;overflow:hidden">
+        <div style="padding:12px 16px;">
+          <div style="font-family:'Courier New',monospace;font-size:13px;color:var(--color-blue);margin-bottom:4px">
+            {{ processos.perfil_nome }}
+          </div>
+          <div style="font-size:12px;color:var(--text-sub);line-height:1.6">
+            {{ processos.perfil_descricao }}
+          </div>
+        </div>
+        {% for proc in processos.detalhes_processos_parsed %}
+        <div style="display:flex;gap:12px;padding:12px 16px;align-items:flex-start">
+          <span style="font-size:10px;padding:2px 8px;border-radius:4px;white-space:nowrap;font-family:'Courier New',monospace;flex-shrink:0;margin-top:1px;{% if proc.ativo %}background:var(--bg-green-dark);color:var(--color-green);{% else %}background:var(--bg-gray-dark);color:var(--text-muted);{% endif %}">
+            {% if proc.ativo %}● Ativo{% else %}✗ Arquivado{% endif %}
+          </span>
+          <div style="flex:1">
+            <div style="font-size:12px;font-family:'Courier New',monospace;color:var(--text-light);margin-bottom:4px">
+              {{ proc.assunto }}
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              {% if proc.tribunal %}
+                <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg-blue-dark);color:var(--color-blue);font-family:'Courier New',monospace">{{ proc.tribunal }}</span>
+              {% endif %}
+              {% if proc.grau %}
+                <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg-footer);color:#888;font-family:'Courier New',monospace">{{ proc.grau }}</span>
+              {% endif %}
+            </div>
+            {% if proc.data %}
+              <div style="font-size:10px;color:var(--text-muted);margin-top:4px">Iniciado em {{ proc.data }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="whois-block" style="color:var(--text-muted);font-style:italic;text-align:center;padding:20px">
+        Nenhum processo judicial localizado nesta investigação.
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <div class="sec-title"><i class="ti ti-world" aria-hidden="true"></i> Dados WHOIS</div>
+      {% if whois_data %}
+      <div class="whois-block">
+        {% if whois_data.dominio %}<div class="wline"><span class="wkey">Domain Name</span><span class="wval hi">{{ whois_data.dominio }}</span></div>{% endif %}
+        {% if whois_data.email %}<div class="wline"><span class="wkey">Email</span><span class="wval hi">{{ whois_data.email }}</span></div>{% endif %}
+        {% if whois_data.person %}<div class="wline"><span class="wkey">Pessoa</span><span class="wval">{{ whois_data.person }}</span></div>{% endif %}
+        {% if whois_data.name %}<div class="wline"><span class="wkey">Registrante</span><span class="wval">{{ whois_data.name }}</span></div>{% endif %}
+        {% if whois_data.name_servers %}<div class="wline"><span class="wkey">Name Servers</span><span class="wval">{{ whois_data.name_servers }}</span></div>{% endif %}
+      </div>
+      {% else %}
+      <div class="whois-block" style="color:var(--text-muted);font-style:italic;text-align:center;padding:20px">Análise WHOIS não solicitada nesta investigação.</div>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <div class="sec-title"><i class="ti ti-search" aria-hidden="true"></i> Resultados de dorks</div>
+      <div class="dork-list">
+        {% for query, items in dorks | groupby('query') %}
+        {% set result_count = items | selectattr('url') | list | length %}
+        <div class="ditem {{ 'hit' if result_count > 0 else 'miss' }}">
+          <span class="dquery">{{ query }}</span>
+          <span class="dresults">{{ result_count }} resultado{% if result_count != 1 %}s{% endif %}</span>
+          <span class="dstatus {{ 'hit' if result_count > 0 else 'miss' }}">
+            {% if result_count > 0 %}✓ Hit{% else %}✗ Miss{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-title"><i class="ti ti-shield-exclamation" aria-hidden="true"></i> Vazamentos encontrados</div>
+      <div class="leak-list">
+        {% if leaks %}
+          {% for leak in leaks %}
+          <div class="litem">
+            <div class="lemail">{{ leak.email }}</div>
+            <div class="lmeta">
+              <span class="lcount">{{ leak.breaches }} vazamento{% if leak.breaches != 1 %}s{% endif %}</span>
+              {% for service in leak.services %}
+                <span class="lservice">{{ service }}</span>
+              {% endfor %}
+              {% if leak.breaches == 0 %}
+                <span style="font-size:11px;color:var(--color-green)">Nenhum vazamento encontrado</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="litem">
+            <div class="lemail" style="color:var(--text-muted)">Nenhum e-mail verificado</div>
+            <div class="lmeta"><span style="font-size:11px;color:var(--color-green)">0 vazamentos</span></div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-title">
+        <i class="ti ti-alert-triangle" aria-hidden="true"></i> BNMP — Banco nacional de mandados de prisão
+      </div>
+      {% if bnmp and bnmp.content %}
+      <div class="whois-block" style="padding:0;overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:0.5px solid var(--color-border);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:var(--text-sub);font-family:'Courier New',monospace">
+            Resultados para: <span style="color:var(--color-blue)">{{ bnmp.query }}</span>
+          </span>
+          <span style="font-size:11px;color:var(--text-muted)">
+            <span style="color:var(--color-red);font-weight:500">{{ bnmp.totalElements }}</span> registros encontrados
+          </span>
+        </div>
+        {% for item in bnmp.content %}
+        <div style="border-bottom:0.5px solid var(--color-border)">
+          <div style="padding:10px 16px 6px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:13px;font-family:'Courier New',monospace;color:var(--text-light);flex:1">{{ item.nomePessoa }}</span>
+            {% if item.alcunha and item.alcunha | lower not in ['não informado', 'não consta', 'sem informações nos autos'] %}
+              <span style="font-size:10px;color:var(--text-muted);font-style:italic">"{{ item.alcunha }}"</span>
+            {% endif %}
+            <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#2e1a0a;color:var(--color-amber); font-family:'Courier New',monospace;white-space:nowrap">● {{ item.descricaoStatus }}</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg-blue-dark);color:var(--color-blue); font-family:'Courier New',monospace;white-space:nowrap">{{ item.descricaoPeca }}</span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;padding:0 16px 10px 16px">
+            <tr>
+              <td style="padding:4px 16px;width:50%;vertical-align:top">
+                <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Processo</div>
+                <div style="font-size:11px;font-family:'Courier New',monospace;color:var(--color-blue)">{{ item.numeroPecaFormatado }}</div>
+              </td>
+              <td style="padding:4px 16px;width:50%;vertical-align:top">
+                <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Órgão</div>
+                <div style="font-size:11px;font-family:'Courier New',monospace;color:var(--text-light)">{{ item.nomeOrgao }}</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:4px 16px;vertical-align:top">
+                <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Nascimento</div>
+                <div style="font-size:11px;font-family:'Courier New',monospace;color:var(--text-light)">{{ item.dataNascimentoFormatada }}</div>
+              </td>
+              <td style="padding:4px 16px;vertical-align:top">
+                <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Expedição</div>
+                <div style="font-size:11px;font-family:'Courier New',monospace;color:var(--color-amber)">{{ item.dataExpedicaoFormatada }}</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:4px 16px;vertical-align:top">
+                <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Nome da mãe</div>
+                <div style="font-size:11px;font-family:'Courier New',monospace;color:var(--text-light)">{{ item.nomeMae or 'Não informado' }}</div>
+              </td>
+              <td style="padding:4px 16px;vertical-align:top">
+                <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Profissão</div>
+                {% if item.descricaoProfissao %}
+                  <div style="font-size:11px;font-family:'Courier New',monospace;color:var(--text-light)">{{ item.descricaoProfissao }}</div>
+                {% else %}
+                  <div style="font-size:11px;font-family:'Courier New',monospace;color:var(--text-muted);font-style:italic">Não informado</div>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </div>
+        {% endfor %}
+        {% if bnmp.totalElements > bnmp.content | length %}
+        <div style="padding:10px 16px;text-align:center;background:var(--bg-footer);border-top:0.5px solid var(--color-border)">
+          <span style="font-size:11px;color:var(--text-muted)">
+            Exibindo {{ bnmp.content | length }} de {{ bnmp.totalElements }} registros
+          </span>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="whois-block" style="color:var(--text-muted);font-style:italic;text-align:center;padding:20px">
+        Nenhum mandado de prisão localizado nesta investigação.
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <div class="sec-title"><i class="ti ti-list-check" aria-hidden="true"></i> Resumo Analítico da Investigação</div>
+      <div class="suggest" style="white-space: pre-line;">
+        {{ resumo_ia }}
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
