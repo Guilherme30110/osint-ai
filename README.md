@@ -2,7 +2,7 @@
  
 Agente de investigação automatizada em fontes abertas (OSINT), construído como uma máquina de estados com [LangGraph](https://github.com/langchain-ai/langgraph). Um LLM decide dinamicamente qual ferramenta usar a cada passo — dorks, WHOIS, verificação de vazamentos, processos judiciais — com base nos resultados que já foram coletados, em vez de seguir um pipeline fixo.
  
-📖 **Explicação completa da arquitetura e das decisões de design:** [link do post no blog]
+📖 **Explicação completa da arquitetura e das decisões de design:** https://guilherme30110.github.io/portfolio-web/posts/osint_tool
  
 ## O que faz
  
